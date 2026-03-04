@@ -1,0 +1,11 @@
+﻿GameResult
+ ├─ Id: 1
+ ├─ Attempts: 7
+ ├─ TimeTaken: 00:32
+ ├─ Range: 100
+ ├─ PlayedAt: 2026‑03‑04 09:22
+ └─ Guesses:
+      • GuessEntry { Id = 1, Guess = 42, Time = ... }
+      • GuessEntry { Id = 2, Guess = 75, Time = ... }
+      • GuessEntry { Id = 3, Guess = 88, Time = ... }
+      • ...

@@ -1,0 +1,12 @@
+﻿<Application x:Class="ASI_GuessTheNumber.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:ASI_GuessTheNumber"            
+             xmlns:vm="clr-namespace:ASI_GuessTheNumber.ViewModel" 
+             StartupUri="View/MainWindow.xaml">
+    <Application.Resources>
+        <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <local:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" />
+    </Application.Resources>
+
+</Application>

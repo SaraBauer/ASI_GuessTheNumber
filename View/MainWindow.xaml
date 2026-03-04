@@ -1,0 +1,87 @@
+﻿<Window x:Class="ASI_GuessTheNumber.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ASI_GuessTheNumber"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <StackPanel Margin="20" VerticalAlignment="Center">
+            <TextBlock Text="Winner Winner Chicken Dinner"
+           FontSize="28"
+           FontWeight="Bold"
+           Foreground="Red"
+           HorizontalAlignment="Center"
+           Margin="0,20,0,0"
+           Visibility="{Binding IsGameFinished, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+            <Button Content="Start"
+        Command="{Binding ShowStartPopupCommand}"
+        IsEnabled="{Binding IsStartEnabled}"
+        Visibility="{Binding IsStartEnabled, Converter={StaticResource BoolToVisibilityConverter}}"
+        FontSize="18"
+        Padding="10"
+        Margin="0,0,0,20"
+        HorizontalAlignment="Center"/>
+
+            <TextBox Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
+             FontSize="16"
+            Visibility="{Binding IsStartEnabled, Converter={StaticResource InverseBoolToVisibilityConverter}}"
+             PreviewTextInput="NumberOnly" />
+
+            <TextBlock Text="{Binding ErrorMessage}"
+               Foreground="Red"
+               FontSize="14"
+               Visibility="{Binding IsStartEnabled, Converter={StaticResource InverseBoolToVisibilityConverter}}"
+               Margin="0,5,0,0" />
+
+            <Button Content="Guess"
+            Command="{Binding ProcessNumberCommand}"
+             Visibility="{Binding IsStartEnabled, Converter={StaticResource InverseBoolToVisibilityConverter}}"
+            Margin="0,10,0,0"
+            FontSize="16" />
+
+            <Button Content="New Game"
+            Command="{Binding NewGameCommand}"
+            Margin="0,10,0,0"
+            Visibility="{Binding IsStartEnabled, Converter={StaticResource InverseBoolToVisibilityConverter}}"
+            FontSize="16" />
+
+            <TextBlock Text="Attempts:"
+               FontSize="14"
+             Visibility="{Binding IsStartEnabled, Converter={StaticResource InverseBoolToVisibilityConverter}}"
+               Margin="0,15,0,0" />
+
+            <TextBlock Text="{Binding GuessCount}"
+               FontSize="18"
+               Visibility="{Binding IsStartEnabled, Converter={StaticResource InverseBoolToVisibilityConverter}}"
+               Foreground="DarkGreen" />
+
+            <TextBlock Text="Time:"
+               FontSize="14"
+               Visibility="{Binding IsStartEnabled, Converter={StaticResource InverseBoolToVisibilityConverter}}"
+               Margin="0,15,0,0" />
+
+            <TextBlock Text="{Binding TimeElapsed}"
+               FontSize="18"
+              Visibility="{Binding IsStartEnabled, Converter={StaticResource InverseBoolToVisibilityConverter}}"
+               Foreground="DarkRed" />
+
+            <TextBlock Text="{Binding Result}"
+               FontSize="16"
+               Margin="0,20,0,0"
+               Visibility="{Binding IsStartEnabled, Converter={StaticResource InverseBoolToVisibilityConverter}}"        
+               Foreground="DarkBlue" />
+
+            <ItemsControl ItemsSource="{Binding LastGameResult.Guesses}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Guess}" FontSize="14" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+
+    </Grid>
+</Window>
