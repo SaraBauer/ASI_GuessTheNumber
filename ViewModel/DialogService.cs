@@ -5,16 +5,22 @@ namespace ASI_GuessTheNumber.ViewModel
 {
     public class DialogService : IDialogService
     {
-        public bool ShowNewGamePrompt(ObservableCollection<int> rangeOptions, Action<int> callback)
+        public void ShowNewGamePopup(ObservableCollection<int> rangeOptions, Action<int> callback)
         {
-            var popup = new StartGamePopup(rangeOptions, callback);
+            var popup = new NewGamePopup(rangeOptions, callback);
             popup.Owner = Application.Current.MainWindow;
             popup.ShowDialog();
-            return true;
         }
         public void ShowStartGamePopup(ObservableCollection<int> rangeOptions, Action<int> callback)
         {
             var popup = new StartGamePopup(rangeOptions, callback);
+            popup.Owner = Application.Current.MainWindow;
+            popup.ShowDialog();
+        }
+
+        public void ShowCancelAndStartGamePopup(ObservableCollection<int> rangeOptions, Action<int> callback)
+        {
+            var popup = new CancelAndStartNewGamePopup(rangeOptions, callback);
             popup.Owner = Application.Current.MainWindow;
             popup.ShowDialog();
         }

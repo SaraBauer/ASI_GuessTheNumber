@@ -43,7 +43,7 @@
             FontSize="16" />
 
             <Button Content="New Game"
-            Command="{Binding NewGameCommand}"
+            Command="{Binding CancelGameCommand}"
             Margin="0,10,0,0"
             Visibility="{Binding IsStartEnabled, Converter={StaticResource InverseBoolToVisibilityConverter}}"
             FontSize="16" />

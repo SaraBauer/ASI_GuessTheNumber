@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
 namespace ASI_GuessTheNumber.ViewModel
 {
-    public class StartGamePopupViewModel
+    public class CancelAndStartNewGamePopupViewModel
     {
         public ObservableCollection<int> RangeOptions { get; }
         public int SelectedRange { get; set; }
@@ -16,7 +20,8 @@ namespace ASI_GuessTheNumber.ViewModel
         private readonly Window _window;
         private readonly Action<int> _callback;
 
-        public StartGamePopupViewModel(ObservableCollection<int> rangeOptions,  Window window, Action<int> callback)
+        public CancelAndStartNewGamePopupViewModel(ObservableCollection<int> rangeOptions, Window window,
+            Action<int> callback)
         {
             RangeOptions = rangeOptions;
             SelectedRange = rangeOptions[0]; // default selection

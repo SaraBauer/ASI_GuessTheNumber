@@ -25,7 +25,7 @@ namespace ASI_GuessTheNumber.ViewModel
         private TimeSpan _time;
         private int _currentGameId;
 
-        private readonly IGuessApiService _guessApi;
+
     
         public MainViewModel(IDialogService dialogService, IGuessApiService guessApi)
         {
@@ -41,12 +41,22 @@ namespace ASI_GuessTheNumber.ViewModel
             _guessApi = guessApi; 
         
             ProcessNumberCommand = new RelayCommand(async _ => await CheckGuess(), _ => CanProcess());
-            StartGameCommand = new RelayCommand(_ => StartGame());
-            NewGameCommand = new RelayCommand(_ => NewGame());
+            StartGameCommand = new RelayCommand(async _ => await StartGame());
+            NewGameCommand = new RelayCommand(async _ => await NewGame());
+
             ShowStartPopupCommand = new RelayCommand(_ => ShowStartPopup());
+            CancelGameCommand = new RelayCommand(_ => ShowStartPopup());
 
         }
+
+        private readonly IGuessApiService _guessApi;
+        public ICommand ShowStartPopupCommand { get; }
+        public ICommand CancelGameCommand { get; }
         public ICommand StartGameCommand { get; }
+        public ICommand ProcessNumberCommand { get; }
+   
+        public ICommand NewGameCommand { get; }
+
         public GameResult CurrentGame { get; private set; }
 
         public ObservableCollection<int> RangeOptions { get; }
@@ -62,7 +72,6 @@ namespace ASI_GuessTheNumber.ViewModel
                 CommandManager.InvalidateRequerySuggested(); 
             }
         }
- 
         private bool _isGameStarted;
         public bool IsGameStarted
         {
@@ -74,8 +83,6 @@ namespace ASI_GuessTheNumber.ViewModel
                 CommandManager.InvalidateRequerySuggested();
             }
         }
-
-        public ICommand ShowStartPopupCommand { get; }
 
         private bool _isStartEnabled = true; 
         public bool IsStartEnabled { get => _isStartEnabled; set { _isStartEnabled = value; OnPropertyChanged(); } }
@@ -134,8 +141,6 @@ namespace ASI_GuessTheNumber.ViewModel
         }
         public string TimeElapsed => _time.ToString(@"mm\:ss");
 
-        public ICommand ProcessNumberCommand { get; }
-        public ICommand NewGameCommand { get; }
 
         private void TimerTick(object? sender, EventArgs e)
         {
@@ -143,9 +148,10 @@ namespace ASI_GuessTheNumber.ViewModel
             OnPropertyChanged(nameof(TimeElapsed));
         }
 
+        /*API Calls*/
         private async Task StartNewGameAsync()
         {
-            _currentGameId = await _guessApi.CreateGameAsync(SelectedRange);
+            _currentGameId = await _guessApi.CreateGameAsync(SelectedRange, _targetNumber);
         }
 
         private async Task ProcessGuessAsync(int guess)
@@ -167,6 +173,8 @@ namespace ASI_GuessTheNumber.ViewModel
             );
         }
 
+        /*Game Calls*/
+
         private async Task NewGame()
         {
             CurrentGame = new GameResult
@@ -174,9 +182,10 @@ namespace ASI_GuessTheNumber.ViewModel
                 Range = SelectedRange,
                 PlayedAt = DateTime.Now
             };
-            await StartNewGameAsync();
+    
 
             _targetNumber = new Random().Next(1, SelectedRange + 1);
+            await StartNewGameAsync();
             GuessCount = 0;
             InputText = "";
             ErrorMessage = "";
@@ -217,21 +226,7 @@ namespace ASI_GuessTheNumber.ViewModel
             IsGameStarted = true;
         }
 
-        private async Task ShowStartPopup()
-        {
-            _dialogService.ShowStartGamePopup(RangeOptions, async selectedRange =>
-            {
-                if (selectedRange == -1)
-                    return; 
-
-                SelectedRange = selectedRange;
-                IsStartEnabled = false;
-                IsGameStarted = true;
-
-                await NewGame();
-            });
-        }
-
+       
 
         private async Task CheckGuess()
         {
@@ -281,6 +276,26 @@ namespace ASI_GuessTheNumber.ViewModel
         public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+
+
+        /*Popup Methods*/
+
+        private void ShowStartPopup()
+        {
+            _dialogService.ShowStartGamePopup(RangeOptions, async selectedRange =>
+            {
+                if (selectedRange == -1)
+                    return;
+
+                SelectedRange = selectedRange;
+                IsStartEnabled = false;
+                IsGameStarted = true;
+
+                await NewGame();
+            });
+        }
+        
     }
 
 }

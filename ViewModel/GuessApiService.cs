@@ -22,11 +22,12 @@ namespace ASI_GuessTheNumber.ViewModel
             _http.BaseAddress = new Uri("https://localhost:7066"); // your API URL
         }
 
-        public async Task<int> CreateGameAsync(int range)
+        public async Task<int> CreateGameAsync(int range, int targetNumber)
         {
             var dto = new
             {
-                range = range,
+                range,
+                targetNumber,
                 playedAt = DateTime.Now
             };
 
