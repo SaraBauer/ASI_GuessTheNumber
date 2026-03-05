@@ -244,12 +244,6 @@ namespace ASI_GuessTheNumber.ViewModel
 
             int guess = int.Parse(InputText);
 
-            //CurrentGame.Guesses.Add(new GuessEntry
-            //{
-            //    Guess = guess,
-            //    Time = DateTime.Now
-            //});
-
             await ProcessGuessAsync(guess);
             if (guess == _targetNumber)
             {
@@ -260,7 +254,7 @@ namespace ASI_GuessTheNumber.ViewModel
                 CurrentGame.TimeTaken = _time;
                 CurrentGame.PlayedAt = DateTime.Now;
 
-               // _repository.AddGame(CurrentGame);   // <-- saved in EF Core InMemory DB
+               // _repository.AddGame(CurrentGame);   // <-- if it were to be saved directly in EF Core InMemory DB
 
                 Result = $"Correct! Number: {_targetNumber}. Attempts: {GuessCount}. Time: {TimeElapsed}.";
 
