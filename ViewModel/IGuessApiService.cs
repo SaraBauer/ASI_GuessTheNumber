@@ -8,7 +8,9 @@ namespace ASI_GuessTheNumber.ViewModel
 {
     public interface IGuessApiService
     {
-        Task SaveGuessAsync(int guess, bool isCorrect, DateTime timestamp);
+        Task<int> CreateGameAsync(int range);
+        Task SendGuessAsync(int gameId, int guess);
+        Task FinalizeGameAsync(int gameId, int attempts, TimeSpan timeTaken);
     }
 
 }

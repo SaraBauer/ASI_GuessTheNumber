@@ -8,28 +8,65 @@ using System.Threading.Tasks;
 
 namespace ASI_GuessTheNumber.ViewModel
 {
-    public class GuessApiService : IGuessApiService
-    {
-        private readonly HttpClient _httpClient;
+    using System.Net.Http;
+    using System.Net.Http.Json;
+    using System.Threading.Tasks;
 
-        public GuessApiService(HttpClient httpClient)
+    public class GuessApiService: IGuessApiService
+    {
+        private readonly HttpClient _http;
+
+        public GuessApiService(HttpClient http)
         {
-            _httpClient = httpClient;
-            _httpClient.BaseAddress = new Uri("http://localhost:5000"); // your API URL
+            _http = http;
+            _http.BaseAddress = new Uri("https://localhost:7066"); // your API URL
         }
 
-        public async Task SaveGuessAsync(int guess, bool isCorrect, DateTime timestamp)
+        public async Task<int> CreateGameAsync(int range)
         {
-            var payload = new
+            var dto = new
             {
-                guess = guess,
-                correct = isCorrect,
-                time = timestamp
+                range = range,
+                playedAt = DateTime.Now
             };
 
-            var response = await _httpClient.PostAsJsonAsync("/api/guesses", payload);
+            var response = await _http.PostAsJsonAsync("/api/game", dto);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<CreateGameResponse>();
+            return result.GameId;
+        }
+
+        public async Task SendGuessAsync(int gameId, int guess)
+        {
+            var dto = new
+            {
+                guess = guess,
+                time = DateTime.Now,
+                gameResultId = gameId
+            };
+
+            var response = await _http.PostAsJsonAsync("/api/guess", dto);
             response.EnsureSuccessStatusCode();
         }
+
+        public async Task FinalizeGameAsync(int gameId, int attempts, TimeSpan timeTaken)
+        {
+            var dto = new
+            {
+                attempts = attempts,
+                timeTaken = timeTaken
+            };
+
+            var response = await _http.PutAsJsonAsync($"/api/game/{gameId}", dto);
+            response.EnsureSuccessStatusCode();
+        }
+
+        private class CreateGameResponse
+        {
+            public int GameId { get; set; }
+        }
     }
+
 
 }

@@ -18,5 +18,13 @@ namespace ASI_GuessTheNumber.Model
                     .Include(g => g.Guesses)
                     .ToList();
             }
+
+        public async Task<List<GameResult>> GetAllGamesAsync()
+        {
+            return await _context.GameResults
+                .Include(g => g.Guesses)
+                .OrderByDescending(g => g.PlayedAt)
+                .ToListAsync();
         }
+    }
 }

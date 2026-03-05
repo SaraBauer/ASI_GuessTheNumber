@@ -3,6 +3,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
@@ -22,6 +23,7 @@ namespace ASI_GuessTheNumber.ViewModel
         private string _result = "";
         private int _selectedRange;
         private TimeSpan _time;
+        private int _currentGameId;
 
         private readonly IGuessApiService _guessApi;
     
@@ -38,9 +40,6 @@ namespace ASI_GuessTheNumber.ViewModel
 
             _guessApi = guessApi; 
         
-
-            //  NewGame();
-
             ProcessNumberCommand = new RelayCommand(async _ => await CheckGuess(), _ => CanProcess());
             StartGameCommand = new RelayCommand(_ => StartGame());
             NewGameCommand = new RelayCommand(_ => NewGame());
@@ -60,7 +59,7 @@ namespace ASI_GuessTheNumber.ViewModel
             {
                 _isGameFinished = value;
                 OnPropertyChanged();
-                CommandManager.InvalidateRequerySuggested(); // refresh Guess button
+                CommandManager.InvalidateRequerySuggested(); 
             }
         }
  
@@ -145,13 +144,38 @@ namespace ASI_GuessTheNumber.ViewModel
             OnPropertyChanged(nameof(TimeElapsed));
         }
 
-        private void NewGame()
+        private async Task StartNewGameAsync()
+        {
+            _currentGameId = await _guessApi.CreateGameAsync(SelectedRange);
+        }
+
+        private async Task ProcessGuessAsync(int guess)
+        {
+            await _guessApi.SendGuessAsync(_currentGameId, guess);
+
+            if (guess == _targetNumber)
+            {
+                await FinalizeGameAsync();
+            }
+        }
+
+        private async Task FinalizeGameAsync()
+        {
+            await _guessApi.FinalizeGameAsync(
+                _currentGameId,
+                GuessCount,
+                _time
+            );
+        }
+
+        private async Task NewGame()
         {
             CurrentGame = new GameResult
             {
                 Range = SelectedRange,
                 PlayedAt = DateTime.Now
             };
+            await StartNewGameAsync();
 
             _targetNumber = new Random().Next(1, SelectedRange + 1);
             GuessCount = 0;
@@ -187,20 +211,20 @@ namespace ASI_GuessTheNumber.ViewModel
             return IsGameStarted && !IsGameFinished && int.TryParse(InputText, out _);
         }
 
-        private void StartGame()
+        private async Task StartGame()
         {
             IsStartEnabled = false;
 
 
             // Start a new game with that range
-            NewGame();
+            await NewGame();
 
             IsGameStarted = true;
         }
 
-        private void ShowStartPopup()
+        private async Task ShowStartPopup()
         {
-            _dialogService.ShowStartGamePopup(RangeOptions, selectedRange =>
+            _dialogService.ShowStartGamePopup(RangeOptions, async selectedRange =>
             {
                 if (selectedRange == -1)
                     return; // user cancelled
@@ -209,7 +233,7 @@ namespace ASI_GuessTheNumber.ViewModel
                 IsStartEnabled = false;
                 IsGameStarted = true;
 
-                NewGame();
+                await NewGame();
             });
         }
 
@@ -220,14 +244,13 @@ namespace ASI_GuessTheNumber.ViewModel
 
             int guess = int.Parse(InputText);
 
-           // await _guessApi.SaveGuessAsync(guess, true, DateTime.Now);
+            //CurrentGame.Guesses.Add(new GuessEntry
+            //{
+            //    Guess = guess,
+            //    Time = DateTime.Now
+            //});
 
-            CurrentGame.Guesses.Add(new GuessEntry
-            {
-                Guess = guess,
-                Time = DateTime.Now
-            });
-
+            await ProcessGuessAsync(guess);
             if (guess == _targetNumber)
             {
                 _timer.Stop();
@@ -237,14 +260,14 @@ namespace ASI_GuessTheNumber.ViewModel
                 CurrentGame.TimeTaken = _time;
                 CurrentGame.PlayedAt = DateTime.Now;
 
-                _repository.AddGame(CurrentGame);   // <-- saved in EF Core InMemory DB
+               // _repository.AddGame(CurrentGame);   // <-- saved in EF Core InMemory DB
 
                 Result = $"Correct! Number: {_targetNumber}. Attempts: {GuessCount}. Time: {TimeElapsed}.";
 
 
                 string msg = $"You solved it in {GuessCount} attempts.\nTime: {TimeElapsed}";
-              //  _dialogService.ShowNewGamePrompt(msg, NewGame);
-                _dialogService.ShowStartGamePopup(RangeOptions, selectedRange =>
+
+                _dialogService.ShowStartGamePopup(RangeOptions, async selectedRange =>
                 {
                     if (selectedRange == -1)
                         return; // user cancelled
@@ -253,7 +276,7 @@ namespace ASI_GuessTheNumber.ViewModel
                     IsStartEnabled = false;
                     IsGameStarted = true;
 
-                    NewGame();
+                    await NewGame();
                 });
             }
             else if (guess < _targetNumber)
