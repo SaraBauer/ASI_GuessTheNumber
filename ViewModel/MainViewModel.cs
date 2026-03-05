@@ -29,7 +29,7 @@ namespace ASI_GuessTheNumber.ViewModel
     
         public MainViewModel(IDialogService dialogService, IGuessApiService guessApi)
         {
-            _repository = new();   // in-memory DB
+            _repository = new();   // for potential direct in-memory DB
 
             RangeOptions = new ObservableCollection<int> { 10, 100 };
             SelectedRange = 10;
@@ -132,7 +132,6 @@ namespace ASI_GuessTheNumber.ViewModel
                 OnPropertyChanged();
             }
         }
-
         public string TimeElapsed => _time.ToString(@"mm\:ss");
 
         public ICommand ProcessNumberCommand { get; }
@@ -214,11 +213,7 @@ namespace ASI_GuessTheNumber.ViewModel
         private async Task StartGame()
         {
             IsStartEnabled = false;
-
-
-            // Start a new game with that range
             await NewGame();
-
             IsGameStarted = true;
         }
 
@@ -227,7 +222,7 @@ namespace ASI_GuessTheNumber.ViewModel
             _dialogService.ShowStartGamePopup(RangeOptions, async selectedRange =>
             {
                 if (selectedRange == -1)
-                    return; // user cancelled
+                    return; 
 
                 SelectedRange = selectedRange;
                 IsStartEnabled = false;
@@ -255,7 +250,6 @@ namespace ASI_GuessTheNumber.ViewModel
                 CurrentGame.PlayedAt = DateTime.Now;
 
                // _repository.AddGame(CurrentGame);   // <-- if it were to be saved directly in EF Core InMemory DB
-
                 Result = $"Correct! Number: {_targetNumber}. Attempts: {GuessCount}. Time: {TimeElapsed}.";
 
 
