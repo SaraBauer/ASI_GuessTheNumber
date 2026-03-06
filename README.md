@@ -1,9 +1,18 @@
 # ASI_GuessTheNumber
 
 ASI_GuessTheNumer is a WPF number guessing game where an user can guess a randomly generated number from a preselected range.
-- If the correct number was guessed, a popup window enables the user to start
--  a new game or to cancel, the latter leaving the game in an idle mode awaiting further commands.
-- A started guessing game can be aborted and a new game can be started thereafter (or resumed).
+- The first game only starts after pressing the **`Start`** button which shows a popup for the range selection
+  - this ensures a save starting point for the player, and enables range selection on the first try
+  - a timer starts up on every new game to record the time taken and is also displayed
+- A guess is entered into the input field which only allows digits from 1-10; letters are prefiltered and not seen in the input
+- Clicking **`Guess`** submits the guess and triggers the comparison logic
+- a counter tracks the number of attemts
+- if the wrong number was guessed, a message is printed to show if the number guessed was too high or too low
+- If the correct number was guessed, a popup window enables the user to start either:
+  - a new game
+  - cancel, which leaves the game in an idle mode awaiting further commands
+- A running guessing game can be aborted by pressing and the **`New Game`** can be started thereafter (or resumed).
+
 
 WPF application written in C# with .Net 9.
 
