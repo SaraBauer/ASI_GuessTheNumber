@@ -9,10 +9,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="DEPR\**" />
+    <EmbeddedResource Remove="DEPR\**" />
+    <None Remove="DEPR\**" />
+    <Page Remove="DEPR\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="EntityFramework" Version="6.5.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.13" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.13" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Model\" />
   </ItemGroup>
 
 </Project>

@@ -19,9 +19,10 @@ namespace ASI_GuessTheNumber.ViewModel
         public GuessApiService(HttpClient http)
         {
             _http = http;
-            _http.BaseAddress = new Uri("https://localhost:7066"); // your API URL
+            _http.BaseAddress = new Uri("https://localhost:7066"); // APIService URL
         }
 
+        // The call to send a new game to the API
         public async Task<int> CreateGameAsync(int range, int targetNumber)
         {
             var dto = new
@@ -38,6 +39,7 @@ namespace ASI_GuessTheNumber.ViewModel
             return result.GameId;
         }
 
+        // Call to send a new a guess including the gameId for FK relationship
         public async Task SendGuessAsync(int gameId, int guess)
         {
             var dto = new
@@ -51,6 +53,7 @@ namespace ASI_GuessTheNumber.ViewModel
             response.EnsureSuccessStatusCode();
         }
 
+        // final call after successful game adding the attempts and the time taken
         public async Task FinalizeGameAsync(int gameId, int attempts, TimeSpan timeTaken)
         {
             var dto = new

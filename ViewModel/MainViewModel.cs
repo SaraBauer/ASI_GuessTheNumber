@@ -12,42 +12,36 @@ namespace ASI_GuessTheNumber.ViewModel
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        private readonly GameRepository _repository;
-        private readonly DispatcherTimer _timer;
-        private readonly IDialogService _dialogService;
+        public event PropertyChangedEventHandler? PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string name = null)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
-        private int _targetNumber;
-        private int _guessCount;
-        private string _inputText = "";
-        private string _errorMessage = "";
-        private string _result = "";
-        private int _selectedRange;
-        private TimeSpan _time;
-        private int _currentGameId;
-
-
-    
         public MainViewModel(IDialogService dialogService, IGuessApiService guessApi)
         {
-            _repository = new();   // for potential direct in-memory DB
-
             RangeOptions = new ObservableCollection<int> { 10, 100 };
-            SelectedRange = 10;
+            SelectedRange = 10; //default
+
+            //services
+            _guessApi = guessApi;
             _dialogService = dialogService;
+
+            //timer
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromSeconds(1);
             _timer.Tick += TimerTick;
 
-            _guessApi = guessApi; 
-        
+            //RelayCommands wrapping the private methods defined in this class
             ProcessNumberCommand = new RelayCommand(async _ => await CheckGuess(), _ => CanProcess());
             StartGameCommand = new RelayCommand(async _ => await StartGame());
             NewGameCommand = new RelayCommand(async _ => await NewGame());
 
             ShowStartPopupCommand = new RelayCommand(_ => ShowStartPopup());
             CancelGameCommand = new RelayCommand(_ => ShowStartPopup());
-
         }
+
+        /************************************* ICommands and important attributes *************************************/
+        private readonly DispatcherTimer _timer;
+        private readonly IDialogService _dialogService;
 
         private readonly IGuessApiService _guessApi;
         public ICommand ShowStartPopupCommand { get; }
@@ -60,6 +54,17 @@ namespace ASI_GuessTheNumber.ViewModel
         public GameResult CurrentGame { get; private set; }
 
         public ObservableCollection<int> RangeOptions { get; }
+
+        /************************************* General Attributes *************************************/
+
+        private int _targetNumber;
+        private int _guessCount;
+        private string _inputText = "";
+        private string _errorMessage = "";
+        private string _result = "";
+        private int _selectedRange;
+        private TimeSpan _time;
+        private int _currentGameId;
 
         private bool _isGameFinished;
         public bool IsGameFinished
@@ -87,7 +92,6 @@ namespace ASI_GuessTheNumber.ViewModel
         private bool _isStartEnabled = true; 
         public bool IsStartEnabled { get => _isStartEnabled; set { _isStartEnabled = value; OnPropertyChanged(); } }
 
-
         public int SelectedRange
         {
             get => _selectedRange;
@@ -97,7 +101,6 @@ namespace ASI_GuessTheNumber.ViewModel
                 OnPropertyChanged();
             }
         }
-
         public string InputText
         {
             get => _inputText;
@@ -109,7 +112,6 @@ namespace ASI_GuessTheNumber.ViewModel
                 CommandManager.InvalidateRequerySuggested();
             }
         }
-
         public string ErrorMessage
         {
             get => _errorMessage;
@@ -119,7 +121,6 @@ namespace ASI_GuessTheNumber.ViewModel
                 OnPropertyChanged();
             }
         }
-
         public string Result
         {
             get => _result;
@@ -129,7 +130,6 @@ namespace ASI_GuessTheNumber.ViewModel
                 OnPropertyChanged();
             }
         }
-
         public int GuessCount
         {
             get => _guessCount;
@@ -141,19 +141,17 @@ namespace ASI_GuessTheNumber.ViewModel
         }
         public string TimeElapsed => _time.ToString(@"mm\:ss");
 
-
         private void TimerTick(object? sender, EventArgs e)
         {
             _time = _time.Add(TimeSpan.FromSeconds(1));
             OnPropertyChanged(nameof(TimeElapsed));
         }
 
-        /*API Calls*/
+        /************************************* API Calls *************************************/
         private async Task StartNewGameAsync()
         {
             _currentGameId = await _guessApi.CreateGameAsync(SelectedRange, _targetNumber);
         }
-
         private async Task ProcessGuessAsync(int guess)
         {
             await _guessApi.SendGuessAsync(_currentGameId, guess);
@@ -163,7 +161,6 @@ namespace ASI_GuessTheNumber.ViewModel
                 await FinalizeGameAsync();
             }
         }
-
         private async Task FinalizeGameAsync()
         {
             await _guessApi.FinalizeGameAsync(
@@ -172,9 +169,40 @@ namespace ASI_GuessTheNumber.ViewModel
                 _time
             );
         }
+        /************************************* Evaluative Calls *************************************/
+        private void Validate()
+        {
+            if (string.IsNullOrWhiteSpace(InputText))
+            {
+                ErrorMessage = "Input cannot be empty.";
+            }
+            else if (!int.TryParse(InputText, out _))
+            {
+                ErrorMessage = "Please enter a valid number.";
+            }
+            else
+            {
+                ErrorMessage = "";
+            }
+        }
 
-        /*Game Calls*/
+        private bool CanProcess()
+        {
+            return IsGameStarted && !IsGameFinished && int.TryParse(InputText, out _);
+        }
 
+        /************************************* Game Calls *************************************/
+
+        private async Task StartGame()
+        {
+            IsStartEnabled = false;
+            await NewGame();
+            IsGameStarted = true;
+        }
+
+        /*  Creates new Game and resets timer, input text, guess count
+         *  creates new random number
+        */
         private async Task NewGame()
         {
             CurrentGame = new GameResult
@@ -198,36 +226,11 @@ namespace ASI_GuessTheNumber.ViewModel
         }
 
 
-        private void Validate()
-        {
-            if (string.IsNullOrWhiteSpace(InputText))
-            {
-                ErrorMessage = "Input cannot be empty.";
-            }
-            else if (!int.TryParse(InputText, out _))
-            {
-                ErrorMessage = "Please enter a valid number.";
-            }
-            else
-            {
-                ErrorMessage = "";
-            }
-        }
-
-        private bool CanProcess()
-        {
-            return IsGameStarted && !IsGameFinished && int.TryParse(InputText, out _);
-        }
-
-        private async Task StartGame()
-        {
-            IsStartEnabled = false;
-            await NewGame();
-            IsGameStarted = true;
-        }
-
-       
-
+        /*  Core Method that evaluates if guess war correct or too high or too ow.
+         *  If correct, it shows popup to select further game.
+         *  Prints Result and other information
+         *  calls  ProcessGuessAsync(guess);to send guess information over API
+        */
         private async Task CheckGuess()
         {
             GuessCount++;
@@ -246,7 +249,6 @@ namespace ASI_GuessTheNumber.ViewModel
 
                // _repository.AddGame(CurrentGame);   // <-- if it were to be saved directly in EF Core InMemory DB
                 Result = $"Correct! Number: {_targetNumber}. Attempts: {GuessCount}. Time: {TimeElapsed}.";
-
 
                 string msg = $"You solved it in {GuessCount} attempts.\nTime: {TimeElapsed}";
 
@@ -272,14 +274,7 @@ namespace ASI_GuessTheNumber.ViewModel
             }
         }
 
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string name = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-
-
-
-        /*Popup Methods*/
+        /************************************* Popup Methods *************************************/
 
         private void ShowStartPopup()
         {
@@ -294,8 +289,6 @@ namespace ASI_GuessTheNumber.ViewModel
 
                 await NewGame();
             });
-        }
-        
+        } 
     }
-
 }

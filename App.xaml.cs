@@ -16,9 +16,6 @@ namespace ASI_GuessTheNumber
         {
             services.AddSingleton<IGuessApiService, GuessApiService>(); 
             services.AddHttpClient<GuessApiService>();
-
-           // services.AddHttpClient<IGuessApiService, GuessApiService>(client => { client.BaseAddress = new Uri("http://localhost:5000"); });
-
         }
     }
 
