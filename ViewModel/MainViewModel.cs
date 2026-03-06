@@ -247,7 +247,6 @@ namespace ASI_GuessTheNumber.ViewModel
                 CurrentGame.TimeTaken = _time;
                 CurrentGame.PlayedAt = DateTime.Now;
 
-               // _repository.AddGame(CurrentGame);   // <-- if it were to be saved directly in EF Core InMemory DB
                 Result = $"Correct! Number: {_targetNumber}. Attempts: {GuessCount}. Time: {TimeElapsed}.";
 
                 string msg = $"You solved it in {GuessCount} attempts.\nTime: {TimeElapsed}";
