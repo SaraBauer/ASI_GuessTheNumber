@@ -34,6 +34,8 @@ A WebAPI called [ASI_APIService](https://github.com/SaraBauer/ASI_APIService) wa
 | MVVM  |
 
 #Installing
+> [!IMPORTANT]
+> A WebAPI called [ASI_APIService](https://github.com/SaraBauer/ASI_APIService) was implemented and MUST be started concurringly to ensure the listening and processing of the received data.
 
 1. Either run directly
 ```bash
