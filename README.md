@@ -26,8 +26,12 @@ For every game, the data is sent over a REST API to be collected and saved.
   - 
 A WebAPI called [ASI_APIService](https://github.com/SaraBauer/ASI_APIService) was implemented and MUST be started concurringly to ensure the listening and processing of the received data.
 
-WPF application written in C# with .Net 9.
-MVVC pattern
+| Technologies | 
+|:-----|
+| WPF Application   | 
+| C#   | 
+| .NET 9   |
+| MVVM  |
 
 #Installing
 
