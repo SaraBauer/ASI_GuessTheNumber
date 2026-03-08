@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace ASI_GuessTheNumber.ViewModel
 {
+    using Microsoft.Extensions.Logging;
     using System.Net.Http;
     using System.Net.Http.Json;
     using System.Threading.Tasks;
@@ -22,7 +23,25 @@ namespace ASI_GuessTheNumber.ViewModel
             _http.BaseAddress = new Uri("https://localhost:7066"); // APIService URL
         }
 
+        public async Task<bool> IsApiAvailableAsync()
+        {
+            try
+            {
+                using var client = new HttpClient
+                {
+                    Timeout = TimeSpan.FromSeconds(1)
+                };
+                var response = await client.GetAsync("https://localhost:7066/");
+                return response.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         // The call to send a new game to the API
+
         public async Task<int> CreateGameAsync(int range, int targetNumber)
         {
             var dto = new
@@ -31,12 +50,19 @@ namespace ASI_GuessTheNumber.ViewModel
                 targetNumber,
                 playedAt = DateTime.Now
             };
+            try
+            {
+                var response = await _http.PostAsJsonAsync("/api/game", dto);
+                response.EnsureSuccessStatusCode();
 
-            var response = await _http.PostAsJsonAsync("/api/game", dto);
-            response.EnsureSuccessStatusCode();
-
-            var result = await response.Content.ReadFromJsonAsync<CreateGameResponse>();
-            return result.GameId;
+                var result = await response.Content.ReadFromJsonAsync<CreateGameResponse>();
+                return result.GameId;
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return -1;
         }
 
         // Call to send a new a guess including the gameId for FK relationship
@@ -48,9 +74,16 @@ namespace ASI_GuessTheNumber.ViewModel
                 time = DateTime.Now,
                 gameResultId = gameId
             };
+            try
+            {
+                var response = await _http.PostAsJsonAsync("/api/guess", dto);
+                response.EnsureSuccessStatusCode();
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
-            var response = await _http.PostAsJsonAsync("/api/guess", dto);
-            response.EnsureSuccessStatusCode();
         }
 
         // final call after successful game adding the attempts and the time taken
@@ -61,9 +94,16 @@ namespace ASI_GuessTheNumber.ViewModel
                 attempts = attempts,
                 timeTaken = timeTaken
             };
+            try
+            {
+                var response = await _http.PutAsJsonAsync($"/api/game/{gameId}", dto);
+                response.EnsureSuccessStatusCode();
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
-            var response = await _http.PutAsJsonAsync($"/api/game/{gameId}", dto);
-            response.EnsureSuccessStatusCode();
         }
 
         private class CreateGameResponse

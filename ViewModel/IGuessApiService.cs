@@ -11,6 +11,7 @@ namespace ASI_GuessTheNumber.ViewModel
         Task<int> CreateGameAsync(int range, int targetNumber);
         Task SendGuessAsync(int gameId, int guess);
         Task FinalizeGameAsync(int gameId, int attempts, TimeSpan timeTaken);
+        Task<bool> IsApiAvailableAsync();
     }
 
 }

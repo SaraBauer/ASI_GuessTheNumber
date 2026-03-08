@@ -104,6 +104,13 @@
                Visibility="{Binding IsStartEnabled, Converter={StaticResource InverseBoolToVisibilityConverter}}"        
                />
 
+            <TextBlock Text="{Binding ConnectionInfo}"
+               FontSize="16"
+               Margin="0,20,0,0"
+              Foreground="#f18832"
+               Visibility="{Binding IsStartEnabled, Converter={StaticResource InverseBoolToVisibilityConverter}}"        
+               />
+
             <ItemsControl ItemsSource="{Binding LastGameResult.Guesses}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>

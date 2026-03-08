@@ -37,6 +37,10 @@ namespace ASI_GuessTheNumber.ViewModel
 
             ShowStartPopupCommand = new RelayCommand(_ => ShowStartPopup());
             CancelGameCommand = new RelayCommand(_ => ShowStartPopup());
+
+            //api startup check
+            _ = InitializeAsync();
+
         }
 
         /************************************* ICommands and important attributes *************************************/
@@ -62,9 +66,11 @@ namespace ASI_GuessTheNumber.ViewModel
         private string _inputText = "";
         private string _errorMessage = "";
         private string _result = "";
+        private string _connectionInfo = "";
         private int _selectedRange;
         private TimeSpan _time;
         private int _currentGameId;
+        private bool _apiUp;
 
         private bool _isGameFinished;
         public bool IsGameFinished
@@ -130,6 +136,15 @@ namespace ASI_GuessTheNumber.ViewModel
                 OnPropertyChanged();
             }
         }
+        public string ConnectionInfo
+        {
+            get => _connectionInfo;
+            set
+            {
+                _connectionInfo = value;
+                OnPropertyChanged();
+            }
+        }
         public int GuessCount
         {
             get => _guessCount;
@@ -148,17 +163,34 @@ namespace ASI_GuessTheNumber.ViewModel
         }
 
         /************************************* API Calls *************************************/
+
+        private async Task InitializeAsync()
+        {
+            _apiUp = await _guessApi.IsApiAvailableAsync();
+            if (!_apiUp)
+            {
+                ConnectionInfo = "Could not establish http connection, game will still run, but no saving enabled.";
+            }
+
+        }
+
         private async Task StartNewGameAsync()
         {
-            _currentGameId = await _guessApi.CreateGameAsync(SelectedRange, _targetNumber);
+            if ((_apiUp))
+            {
+                _currentGameId = await _guessApi.CreateGameAsync(SelectedRange, _targetNumber);
+            }   
         }
         private async Task ProcessGuessAsync(int guess)
         {
-            await _guessApi.SendGuessAsync(_currentGameId, guess);
-
-            if (guess == _targetNumber)
+            if (_apiUp)
             {
-                await FinalizeGameAsync();
+                await _guessApi.SendGuessAsync(_currentGameId, guess);
+
+                if (guess == _targetNumber)
+                {
+                    await FinalizeGameAsync();
+                }
             }
         }
         private async Task FinalizeGameAsync()
