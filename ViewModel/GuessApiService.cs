@@ -28,11 +28,11 @@ namespace ASI_GuessTheNumber.ViewModel
         {
             try
             {
-                using var client = new HttpClient
-                {
-                    Timeout = TimeSpan.FromSeconds(1)
-                };
-                var response = await client.GetAsync("https://localhost:7066/");
+                //using var client = new HttpClient
+                //{
+                //    Timeout = TimeSpan.FromSeconds(1)
+                //};
+                var response = await _http.GetAsync("https://localhost:7066/");
                 return response.IsSuccessStatusCode;
             }
             catch
