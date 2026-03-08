@@ -40,9 +40,12 @@
                 <TextBox Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
              FontSize="16"
                   Margin="0,5,0,0"
+                  GotKeyboardFocus="TextBox_GotKeyboardFocus"
+                 PreviewMouseLeftButtonDown="TextBox_PreviewMouseLeftButtonDown"
                      Foreground="#24374b"
                        
             Visibility="{Binding IsStartEnabled, Converter={StaticResource InverseBoolToVisibilityConverter}}"
+
              PreviewTextInput="NumberOnly" />
 
             <TextBlock Text="{Binding ErrorMessage}"
@@ -97,7 +100,8 @@
               Visibility="{Binding IsStartEnabled, Converter={StaticResource InverseBoolToVisibilityConverter}}"
                Foreground ="#d3deea" />
 
-            <TextBlock Text="{Binding Result}"
+            <TextBlock Text="{Binding Result, NotifyOnTargetUpdated=True}"
+              Style="{StaticResource FlashOnChange}"
                FontSize="16"
                Margin="0,20,0,0"
               Foreground="#f18832"

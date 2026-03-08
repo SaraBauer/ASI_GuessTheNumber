@@ -23,6 +23,7 @@ namespace ASI_GuessTheNumber.ViewModel
             _http.BaseAddress = new Uri("https://localhost:7066"); // APIService URL
         }
 
+        //Check if api is running
         public async Task<bool> IsApiAvailableAsync()
         {
             try

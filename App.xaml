@@ -7,6 +7,21 @@
     <Application.Resources>
         <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
         <local:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" />
+        <Style x:Key="FlashOnChange" TargetType="TextBlock">
+            <Setter Property="Opacity" Value="1"/>
+            <Style.Triggers>
+                <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                         From="0.2" To="1"
+                                         Duration="0:0:0.25"
+                                         AutoReverse="False"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Style.Triggers>
+        </Style>
     </Application.Resources>
 
 </Application>

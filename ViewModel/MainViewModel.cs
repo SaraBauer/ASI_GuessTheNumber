@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
@@ -298,11 +299,14 @@ namespace ASI_GuessTheNumber.ViewModel
             else if (guess < _targetNumber)
             {
                 Result = "Too low — try again!";
+                OnPropertyChanged(nameof(Result));
             }
             else
             {
                 Result = "Too high — try again!";
+                OnPropertyChanged(nameof(Result));
             }
+       
         }
 
         /************************************* Popup Methods *************************************/
@@ -320,6 +324,8 @@ namespace ASI_GuessTheNumber.ViewModel
 
                 await NewGame();
             });
-        } 
+        }
+
+
     }
 }
